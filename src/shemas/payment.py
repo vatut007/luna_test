@@ -11,9 +11,9 @@ class PaymentCreate(BaseModel):
     currency: Currency = Field(
         description="Валюта: RUB, USD, EUR",
     )
-    description: str | None
-    metadata: dict | None
-    webhook_url: str
+    description: str | None = Field()
+    metadata: dict | None = Field()
+    webhook_url: str = Field()
 
 
 class PaymentPublic(BaseModel):

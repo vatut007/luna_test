@@ -1,5 +1,5 @@
 from sqlmodel import SQLModel, Field, Column
-from sqlalchemy import JSON, String, Numeric
+from sqlalchemy import JSON, String, Numeric, TIMESTAMP
 import datetime
 
 
@@ -43,6 +43,7 @@ class Payment(SQLModel, table=True):
     )
     created_at: datetime.datetime = Field(
         default_factory=lambda: datetime.datetime.now(datetime.timezone.utc),
+        sa_column=Column(TIMESTAMP(timezone=True)),
         description="Дата и время создания платежа"
     )
     processed_at: datetime.datetime | None = Field(

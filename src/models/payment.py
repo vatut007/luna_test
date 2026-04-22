@@ -1,6 +1,6 @@
 from sqlmodel import SQLModel, Field, Column
 from sqlalchemy import JSON, String, Numeric
-from datetime import datetime
+import datetime
 
 
 class Payment(SQLModel, table=True):
@@ -16,6 +16,7 @@ class Payment(SQLModel, table=True):
     )
     description: str | None = Field(
         default=None,
+        sa_column=Column(String(255)),
         max_length=255,
         description="Описание платежа"
     )
@@ -30,21 +31,21 @@ class Payment(SQLModel, table=True):
         description="Статус платежа: pending, succeeded, failed"
     )
     idempotency_key: str = Field(
-        unique=True,
-        index=True,
         max_length=64,
+        sa_column=Column(String(64), unique=True, index=True),
         description="Уникальный ключ для защиты от дублирования"
     )
     webhook_url: str | None = Field(
         default=None,
+        sa_column=Column(String(512)),
         max_length=512,
         description="URL для вебхука (уведомления о результате)"
     )
-    created_at: datetime = Field(
-        default_factory=datetime.utcnow,
+    created_at: datetime.datetime = Field(
+        default_factory=lambda: datetime.datetime.now(datetime.timezone.utc),
         description="Дата и время создания платежа"
     )
-    processed_at: datetime | None = Field(
+    processed_at: datetime.datetime | None = Field(
         default=None,
         description="Дата и время обработки платежа"
     )

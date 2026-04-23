@@ -6,6 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from db.db import get_async_session
 from models import Payment
 from shemas.payment import PaymentCreate, PaymentPublic
+from broker.rabbit import broker
 
 
 class PaymentService:
@@ -25,5 +26,6 @@ class PaymentService:
         self.session.add(payment)
         await self.session.commit()
         await self.session.refresh(payment)
+        await broker.publish(payment.model_dump(), queue="payment.new")
         return PaymentPublic(**payment.model_dump(
             include={"id", "status", "created_at"}))

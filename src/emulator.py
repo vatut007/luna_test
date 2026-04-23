@@ -1,19 +1,18 @@
 import asyncio
 
-import httpx
 from faststream import FastStream
-from faststream.rabbit import RabbitBroker, RabbitQueue
+import httpx
+from faststream.rabbit import RabbitQueue
 from sqlmodel import select
 
-from core.utils import get_broker_url
 from db.db import AsyncSessionLocal
 from models.payment import Payment
 from shemas.status import Status
-
-broker = RabbitBroker(get_broker_url())
-app = FastStream(broker)
+from broker.rabbit import broker
 
 payment_queue = RabbitQueue("payment.new", durable=True)
+
+app = FastStream(broker)
 
 
 @broker.subscriber(payment_queue)

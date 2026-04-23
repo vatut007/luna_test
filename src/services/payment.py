@@ -3,10 +3,10 @@ from typing import Annotated
 from fastapi import Depends, Header
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from broker.rabbit import broker
 from db.db import get_async_session
 from models import Payment
 from shemas.payment import PaymentCreate, PaymentPublic
-from broker.rabbit import broker
 
 
 class PaymentService:

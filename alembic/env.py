@@ -1,15 +1,13 @@
 import asyncio
 from logging.config import fileConfig
 
-from sqlalchemy import engine_from_config
-from sqlalchemy import pool
+from sqlalchemy import engine_from_config, pool
 from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
 
 from alembic import context
-
-from src.core.settings import settings
 from src.core.base import SQLModel
+from src.core.settings import settings
 from src.core.utils import get_db_url
 
 # this is the Alembic Config object, which provides

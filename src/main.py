@@ -1,11 +1,11 @@
-from contextlib import asynccontextmanager
 import logging
+from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 
 from api.routers import main_router
-from core.settings import settings
 from broker.rabbit import broker
+from core.settings import settings
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)

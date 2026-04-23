@@ -1,15 +1,15 @@
 import asyncio
 
-from faststream import FastStream, Logger
 import httpx
+from faststream import FastStream, Logger
 from faststream.rabbit import RabbitQueue
 from sqlmodel import select
 
+from broker.rabbit import broker
 from db.db import AsyncSessionLocal
 from models.payment import Payment
-from shemas.status import Status
 from shemas.payment import PaymentWebhook
-from broker.rabbit import broker
+from shemas.status import Status
 
 payment_queue = RabbitQueue("payment.new", durable=True)
 

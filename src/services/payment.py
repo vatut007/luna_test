@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from fastapi import Depends, HTTPException, Header
+from fastapi import Depends, Header, HTTPException
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import select
@@ -27,7 +27,7 @@ class PaymentService:
         await self.session.refresh(payment)
         await broker.publish(payment.id, queue="payment.new")
         return PaymentPublic(**payment.model_dump(
-                include={"id", "status", "created_at"}))
+            include={"id", "status", "created_at"}))
 
     async def get_payment(self, id: int) -> Payment | None:
         payment = await self.session.execute(

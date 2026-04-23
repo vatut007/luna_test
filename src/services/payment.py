@@ -23,9 +23,10 @@ class PaymentService:
     async def create_paymnet(self) -> PaymentPublic:
         payment = Payment(**self.paymentForm.model_dump(),
                           idempotency_key=self.idempotency_key)
+        payment.webhook_url = str(payment.webhook_url)
         self.session.add(payment)
         await self.session.commit()
         await self.session.refresh(payment)
-        await broker.publish(payment.model_dump(), queue="payment.new")
+        await broker.publish(payment.id, queue="payment.new")
         return PaymentPublic(**payment.model_dump(
             include={"id", "status", "created_at"}))

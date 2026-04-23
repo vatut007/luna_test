@@ -1,5 +1,6 @@
 import datetime
 
+from pydantic import HttpUrl
 from sqlalchemy import JSON, TIMESTAMP, Numeric, String
 from sqlmodel import Column, Field, SQLModel
 

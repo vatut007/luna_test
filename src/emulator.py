@@ -1,6 +1,6 @@
 import asyncio
 
-from faststream import FastStream
+from faststream import FastStream, Logger
 import httpx
 from faststream.rabbit import RabbitQueue
 from sqlmodel import select
@@ -8,6 +8,7 @@ from sqlmodel import select
 from db.db import AsyncSessionLocal
 from models.payment import Payment
 from shemas.status import Status
+from shemas.payment import PaymentWebhook
 from broker.rabbit import broker
 
 payment_queue = RabbitQueue("payment.new", durable=True)
@@ -16,8 +17,8 @@ app = FastStream(broker)
 
 
 @broker.subscriber(payment_queue)
-async def process_payment(payment_id: int):
-    print(f"Обрабатываем платёж {payment_id}")
+async def process_payment(payment_id: int, logger: Logger):
+    logger.info(f"Обрабатываем платёж {payment_id}")
     await asyncio.sleep(2)
     success = True
     async with AsyncSessionLocal() as session:
@@ -25,7 +26,7 @@ async def process_payment(payment_id: int):
             select(Payment).where(Payment.id == payment_id))
         payment = payment.scalars().first()
         if payment is None:
-            print("Payment не найден")
+            logger.info("Payment не найден")
             return
         if success:
             payment.status = Status.SUCCEEDED
@@ -33,24 +34,25 @@ async def process_payment(payment_id: int):
             payment.status = Status.FAILED
         session.add(payment)
         await session.commit()
-    await send_webhook(payment)
+        await session.refresh(payment)
+    await send_webhook(payment, logger)
 
 
-async def send_webhook(payment: Payment):
-    webhook_data = {
-        "payment_id": payment.id,
-        "status": payment.status,
-        "amount": payment.amount,
-        "currency": payment.currency
-    }
+async def send_webhook(payment: Payment, logger: Logger):
+    payment_webhook = PaymentWebhook(
+        payment_id=payment.id,
+        status=payment.status,
+        amount=payment.amount,
+        currency=payment.currency
+    )
 
     async with httpx.AsyncClient() as client:
         try:
             response = await client.post(
                 payment.webhook_url,
-                json=webhook_data,
+                json=payment_webhook.model_dump(),
                 timeout=10.0
             )
-            print(f"Вебхук отправлен, статус: {response.status_code}")
+            logger.info(f"Вебхук отправлен, статус: {response.status_code}")
         except Exception as e:
-            print(f"Ошибка отправки вебхука: {e}")
+            logger.error(f"Ошибка отправки вебхука: {e}")

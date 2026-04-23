@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, HttpUrl
 
 from .currency import Currency
 from .status import Status
@@ -15,7 +15,7 @@ class PaymentCreate(BaseModel):
     )
     description: str | None = Field()
     metadata: dict | None = Field()
-    webhook_url: str = Field()
+    webhook_url: HttpUrl = Field()
 
 
 class PaymentPublic(BaseModel):
@@ -27,3 +27,10 @@ class PaymentPublic(BaseModel):
     created_at: datetime = Field(
         description="Дата и время создания платежа"
     )
+
+
+class PaymentWebhook(BaseModel):
+    payment_id: int | None
+    status: str
+    amount: float
+    currency: str

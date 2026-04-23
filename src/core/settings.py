@@ -13,6 +13,10 @@ class Settings(BaseSettings):
     db_address: str
     db_port: str
     debug: bool = False
+    broker_url: str
+    broker_port: str
+    broker_user: str
+    broker_password: str
 
 
 settings = Settings()

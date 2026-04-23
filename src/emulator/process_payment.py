@@ -1,14 +1,16 @@
-from faststream import FastStream
-from faststream.rabbit import RabbitBroker, RabbitQueue
-import httpx
-from sqlmodel import select
-from db.db import AsyncSessionLocal
-from shemas.status import Status
 import asyncio
 
-from models.payment import Payment
+import httpx
+from faststream import FastStream
+from faststream.rabbit import RabbitBroker, RabbitQueue
+from sqlmodel import select
 
-broker = RabbitBroker("amqp://guest:guest@localhost:5672")
+from core.utils import get_broker_url
+from db.db import AsyncSessionLocal
+from models.payment import Payment
+from shemas.status import Status
+
+broker = RabbitBroker(get_broker_url())
 app = FastStream(broker)
 
 payment_queue = RabbitQueue("payment.new", durable=True)
@@ -17,8 +19,7 @@ payment_queue = RabbitQueue("payment.new", durable=True)
 @broker.subscriber(payment_queue)
 async def process_payment(payment_id: int):
     print(f"Обрабатываем платёж {payment_id}")
-
-    await asyncio.sleep(2)  # задержка сети
+    await asyncio.sleep(2)
     success = True
     async with AsyncSessionLocal() as session:
         payment = await session.execute(
@@ -33,18 +34,15 @@ async def process_payment(payment_id: int):
             payment.status = Status.FAILED
         session.add(payment)
         await session.commit()
-
-    # Отправляем вебхук клиенту
     await send_webhook(payment)
 
 
 async def send_webhook(payment: Payment):
     webhook_data = {
         "payment_id": payment.id,
-        "status": payment.status.value,
+        "status": payment.status,
         "amount": payment.amount,
-        "currency": payment.currency,
-        "customer_id": payment.customer_id
+        "currency": payment.currency
     }
 
     async with httpx.AsyncClient() as client:

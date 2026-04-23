@@ -1,6 +1,7 @@
-from sqlmodel import SQLModel, Field, Column
-from sqlalchemy import JSON, String, Numeric, TIMESTAMP
 import datetime
+
+from sqlalchemy import JSON, TIMESTAMP, Numeric, String
+from sqlmodel import Column, Field, SQLModel
 
 
 class Payment(SQLModel, table=True):
@@ -35,9 +36,8 @@ class Payment(SQLModel, table=True):
         sa_column=Column(String(64), unique=True, index=True),
         description="Уникальный ключ для защиты от дублирования"
     )
-    webhook_url: str | None = Field(
-        default=None,
-        sa_column=Column(String(512)),
+    webhook_url: str = Field(
+        sa_column=Column(String(512), nullable=False),
         max_length=512,
         description="URL для вебхука (уведомления о результате)"
     )

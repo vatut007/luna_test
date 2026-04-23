@@ -1,6 +1,7 @@
-from sqlmodel import SQLModel, Field, Column
-from sqlalchemy import JSON, String
 from datetime import datetime
+
+from sqlalchemy import JSON, String
+from sqlmodel import Column, Field, SQLModel
 
 
 class OutboxEvent(SQLModel, table=True):

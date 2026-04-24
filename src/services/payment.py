@@ -1,7 +1,4 @@
-from typing import Annotated
-
-from fastapi import Depends, Header, HTTPException
-from sqlalchemy.exc import IntegrityError
+from fastapi import Depends,
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import select
 

@@ -100,7 +100,7 @@ async def send_webhook(payload: WebhookPayload, logger: Logger):
                 await session.commit()
             logger.info(f"Вебхук отправлен, статус: {response.status_code}")
         except Exception as e:
-            delay = timedelta(seconds=3 * (
+            delay = timedelta(seconds=30 * (
                 BACKOFF_FACTOR**(outbox_message.attempts - 1)))
             next_attempt_at = datetime.now(timezone.utc) + delay
             outbox_message.sqlmodel_update({

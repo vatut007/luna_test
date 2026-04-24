@@ -1,19 +1,95 @@
-version: '3.8'
-
 services:
   rabbitmq:
     image: rabbitmq:3-management
     container_name: rabbitmq-service
+    networks: 
+      - payment_network
     ports:
-      - "5672:5672"   # AMQP
-      - "15672:15672" # Web UI
+      - "5672:5672"
+      - "15672:15672"
     environment:
-      - RABBITMQ_DEFAULT_USER=admin
-      - RABBITMQ_DEFAULT_PASS=secret123
+      RABBITMQ_DEFAULT_USER: ${BROKER_USER:-admin}
+      RABBITMQ_DEFAULT_PASS: ${BROKER_PASSWORD:-secret123}
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
       - ./rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf:ro
     restart: unless-stopped
+    env_file:
+      - .env
+    
+  db:
+    image: postgres:15
+    container_name: postgres_db
+    networks: 
+      - payment_network
+    environment:
+      POSTGRES_DB: ${DB_NAME:-payment}
+      POSTGRES_USER: ${DB_USER:-super}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-super}
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+    env_file:
+      - .env
 
+  web:
+    build:
+      context: ./
+      dockerfile: Dockerfile.web 
+    container_name: payment_api
+    networks: 
+      - payment_network
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+      - rabbitmq
+    environment:
+      DB_NAME: ${DB_NAME:-payment}
+      DB_USER: ${DB_USER:-super}
+      DB_PASSWORD: ${DB_PASSWORD:-super}
+      DB_ADDRESS: db
+      DB_PORT: ${DB_PORT:-5432}
+      BROKER_URL: rabbitmq
+      BROKER_PORT: ${BROKER_PORT:-5672}
+      BROKER_USER: ${BROKER_USER:-admin}
+      BROKER_PASSWORD: ${BROKER_PASSWORD:-secret123}
+      API_KEY: ${API_KEY:-secret}
+    restart: unless-stopped
+    env_file:
+      - .env
+  
+  consumer:
+    build:
+      context: ./
+      dockerfile: Dockerfile.consumer
+    container_name: consumer
+    networks: 
+      - payment_network
+    depends_on:
+      - rabbitmq
+      - db
+      - web
+    environment:
+      DB_NAME: ${DB_NAME:-payment}
+      DB_USER: ${DB_USER:-super}
+      DB_PASSWORD: ${DB_PASSWORD:-super}
+      DB_ADDRESS: db
+      DB_PORT: ${DB_PORT:-5432}
+      BROKER_URL: rabbitmq
+      BROKER_PORT: ${BROKER_PORT:-5672}
+      BROKER_USER: ${BROKER_USER:-admin}
+      BROKER_PASSWORD: ${BROKER_PASSWORD:-secret123}
+    restart: unless-stopped
+    env_file:
+      - .env
+
+networks: 
+  payment_network: 
+    driver: bridge 
 volumes:
   rabbitmq_data:
+  postgres_data:

@@ -5,7 +5,6 @@ description = "Тестовое задание для ММК Луна"
 authors = [
     {name = "Илья Ватютов",email = "vatut007@ya.ru"}
 ]
-readme = "README.md"
 requires-python = ">=3.10,<4.0"
 dependencies = [
     "fastapi[standard] (>=0.136.0,<0.137.0)",
@@ -18,9 +17,14 @@ dependencies = [
     "isort (>=8.0.1,<9.0.0)",
     "autopep8 (>=2.3.2,<3.0.0)",
     "faststream[rabbit] (>=0.6.7,<0.7.0)",
+    "uvicorn (>=0.46.0,<0.47.0)",
 ]
 
+[tool.poetry]
+packages = [{include = "src"}]
+package-mode = false
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
+

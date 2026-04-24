@@ -17,6 +17,7 @@ class Settings(BaseSettings):
     broker_port: str
     broker_user: str
     broker_password: str
+    api_key: str
 
 
 settings = Settings()

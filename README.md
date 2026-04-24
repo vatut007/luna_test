@@ -35,7 +35,7 @@ docker-compose up -d
     "currency": "EUR",
     "description": "Оплата по договору №6500",
     "metadata": {"organization":"ООО 'Ветер'"},
-    "webhook_url": "veter.ru/api/v1/create_payment"
+    "webhook_url": "https://veter.ru/api/v1/create_payment"
 }
 ```
 

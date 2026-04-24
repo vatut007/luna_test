@@ -22,7 +22,7 @@ API_KEY=key_example
 docker-compose up -d 
 ```
 
-Сервис будет доступен по http://localhost:8000/api/v1
+Сервис будет доступен по http://localhost:8000/api/v1  
 Документация http://localhost:8000/api/v1/docs
 
 Можно выполнить Post-запрос по api/v1/payments. В header указать ключ X-API-Key из файла .env переменая API_KEY

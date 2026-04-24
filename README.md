@@ -27,7 +27,7 @@ docker-compose up -d
 
 ## Описание работы 
 
-Можно выполнить Post-запрос по api/v1/payments. В header указать ключ X-API-Key из файла .env переменая API_KEY
+Можно выполнить Post-запрос по http://localhost:8000/api/v1/payments. В header указать ключ X-API-Key из файла .env переменая API_KEY
 
 ```json
 {
@@ -57,12 +57,4 @@ docker-compose up -d
 
 Затем она публикует эти данные в webhook.events.
 
-Если выполнить 
-```json
-
-{
-  "order_id": 1,
-  "product_id": 1,
-  "quantity": 100
-}
-```
+Получить детальную инфомацию о платеже можно по Get запросу к http://localhost:8000/api/v1/payments 

@@ -1,43 +1,36 @@
+from sqlmodel import SQLModel, Field, Column
+from sqlalchemy import JSON, TIMESTAMP, String
 from datetime import datetime
+from datetime import timezone
+from enum import Enum
 
-from sqlalchemy import JSON, String
-from sqlmodel import Column, Field, SQLModel
+
+class OutboxStatus(str, Enum):
+    PENDING = "pending"
+    SENT = "sent"
+    FAILED = "failed"
 
 
-class OutboxEvent(SQLModel, table=True):
-    id: int | None = Field(default=None, primary_key=True)
+class OutboxMessage(SQLModel, table=True):
+    idempotency_key: str | None = Field(default=None,
+                                        primary_key=True,
+                                        index=True)
     event_type: str = Field(
-        max_length=100,
-        description="Тип события (например, payment_created)"
+        sa_column=Column(String(200))
     )
     payload: dict = Field(
-        sa_column=Column(JSON),
-        description="Данные события в формате JSON"
+        sa_column=Column(JSON)
     )
-    idempotency_key: str = Field(
-        unique=True,
-        index=True,
-        max_length=64,
-        description="Ключ идемпотентности для защиты от дублей"
-    )
-    status: str = Field(
-        default="pending",
-        sa_column=Column(String(20)),
-        description="Статус: pending, published, failed"
-    )
-    attempt_count: int = Field(
-        default=0,
-        description="Количество попыток публикации"
-    )
-    last_attempt_at: datetime | None = Field(
+    status: OutboxStatus = Field(default=OutboxStatus.PENDING)
+    attempts: int = Field(default=0)
+    next_attempt_at: datetime | None = Field(
         default=None,
-        description="Время последней попытки публикации"
+        sa_column=Column(TIMESTAMP(timezone=True))
     )
     created_at: datetime = Field(
-        default_factory=datetime.utcnow,
-        description="Дата создания события"
-    )
-    published_at: datetime | None = Field(
+        default_factory=lambda: datetime.now(timezone.utc),
+        sa_column=Column(TIMESTAMP(timezone=True)))
+    last_attempt_at: datetime | None = Field(
         default=None,
-        description="Дата успешной публикации"
+        sa_column=Column(TIMESTAMP(timezone=True))
     )

@@ -34,3 +34,8 @@ class PaymentWebhook(BaseModel):
     status: str
     amount: float
     currency: str
+
+
+class WebhookPayload(PaymentWebhook):
+    idempotency_key: str
+    webhook_url: str

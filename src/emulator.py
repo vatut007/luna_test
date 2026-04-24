@@ -94,19 +94,19 @@ async def send_webhook(payload: WebhookPayload, logger: Logger):
                     "status": OutboxStatus.SENT,
                     "last_attempt_at": datetime.now(timezone.utc),
                     "next_attempt_at": None,
-                    "attempts": outbox_message.attempts+1
+                    "attempts": outbox_message.attempts + 1
                 })
                 session.add(outbox_message)
                 await session.commit()
             logger.info(f"Вебхук отправлен, статус: {response.status_code}")
         except Exception as e:
-            delay = timedelta(seconds=3*(
+            delay = timedelta(seconds=3 * (
                 BACKOFF_FACTOR**(outbox_message.attempts - 1)))
             next_attempt_at = datetime.now(timezone.utc) + delay
             outbox_message.sqlmodel_update({
                 "status": OutboxStatus.FAILED,
                 "next_attempt_at": next_attempt_at,
-                "attempts": outbox_message.attempts+1,
+                "attempts": outbox_message.attempts + 1,
                 "last_attempt_at": datetime.now(timezone.utc)
             })
             session.add(outbox_message)
@@ -120,10 +120,10 @@ async def outbox_relay():
         async with AsyncSessionLocal() as session:
             now = datetime.now(timezone.utc)
             query = select(OutboxMessage).where(
-                    (OutboxMessage.status == OutboxStatus.FAILED) &
-                    (OutboxMessage.next_attempt_at <= now) &
-                    (OutboxMessage.attempts < MAX_RETRIES)
-                    ).limit(10)
+                (OutboxMessage.status == OutboxStatus.FAILED) &
+                (OutboxMessage.next_attempt_at <= now) &
+                (OutboxMessage.attempts < MAX_RETRIES)
+            ).limit(10)
 
             result = await session.execute(query)
             messages = result.scalars().all()

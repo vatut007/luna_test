@@ -1,8 +1,8 @@
-from sqlmodel import SQLModel, Field, Column
-from sqlalchemy import JSON, TIMESTAMP, String
-from datetime import datetime
-from datetime import timezone
+from datetime import datetime, timezone
 from enum import Enum
+
+from sqlalchemy import JSON, TIMESTAMP, String
+from sqlmodel import Column, Field, SQLModel
 
 
 class OutboxStatus(str, Enum):
